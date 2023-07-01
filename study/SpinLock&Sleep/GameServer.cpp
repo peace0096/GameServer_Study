@@ -14,10 +14,15 @@ public:
 		bool expected = false;	// 예상값. 문이 열려있다면?
 		bool desired = true;	// 만약 예상값이라면, 해당 desired로 바꿔줌
 
-		
+
 		while (_locked.compare_exchange_strong(expected, desired) == false)
 		{
 			expected = false;
+			
+			// this_thread::sleep_for(chrono::milliseconds(100));
+			this_thread::sleep_for(100ms);	// 함수 내 오퍼레이터가 있어서 100ms라고 표현 가능
+			// this_thread::yield();	// 0ms 슬리프랑 같음. 다음 스레드한테 양보 후 대기
+
 		}
 
 	}
@@ -73,7 +78,7 @@ int main()
 
 /*
 	스핀락
-	
+
 	동시에 들어와서 자물쇠에 걸어버림.
 	문제를 해결하려면 작업을 시작하고 메모리 점유와 자물쇠 잠금이 동시에 일어나야 함.
 
