@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "LockFreeStack.h"
-
-// 1Â÷ ½Ãµµ
+//
+// 1ì°¨ ì‹œë„
 /*
 
 void InitializeHead(SListHeader* header)
@@ -28,7 +28,7 @@ SListEntry* PopEntrySList(SListHeader* header)
 }
 */
 
-// 2Â÷ ½Ãµµ
+// 2ì°¨ ì‹œë„
 /*
 void InitializeHead(SListHeader* header)
 {
@@ -38,7 +38,7 @@ void InitializeHead(SListHeader* header)
 void PushEntrySList(SListHeader* header, SListEntry* entry)
 {
 	entry->next = header->next;
-	// Ã¹¹øÂ° ÀÎÀÚ¿Í ¼¼¹øÂ° ÀÎÀÚ°¡ °°´Ù¸é, Ã¹¹øÂ° ÀÎÀÚ ÁÖ¼Ò¿¡ µÎ¹øÂ° °ªÀ» µ¤¾î ¾º¿î´Ù.
+	// ì²«ë²ˆì§¸ ì¸ìì™€ ì„¸ë²ˆì§¸ ì¸ìê°€ ê°™ë‹¤ë©´, ì²«ë²ˆì§¸ ì¸ì ì£¼ì†Œì— ë‘ë²ˆì§¸ ê°’ì„ ë®ì–´ ì”Œìš´ë‹¤.
 	while (::InterlockedCompareExchange64((int64*)&header->next, (int64)entry, (int64)entry->next) == 0)
 	{
 
@@ -49,7 +49,7 @@ SListEntry* PopEntrySList(SListHeader* header)
 {
 	SListEntry* expected = header->next;
 
-	// ABA Problem °¡´É.
+	// ABA Problem ê°€ëŠ¥.
 	while (expected && ::InterlockedCompareExchange64((int64*)&header->next, (int64)expected->next, (int64)expected) == 0)
 	{
 
@@ -69,16 +69,16 @@ void PushEntrySList(SListHeader* header, SListEntry* entry)
 	SListHeader expected = {};
 	SListHeader desired = {};
 
-	// 16 ¹ÙÀÌÆ® Á¤·Ä
+	// 16 ë°”ì´íŠ¸ ì •ë ¬
 	desired.HeaderX64.next = (((uint64)entry) >> 4);
 
 	while(true)
 	{
 		expected = *header;
 
-		// ÀÌ »çÀÌ¿¡ º¯°æµÉ ¼ö ÀÖ´Ù.
+		// ì´ ì‚¬ì´ì— ë³€ê²½ë  ìˆ˜ ìˆë‹¤.
 
-		// 4ºñÆ® ¹Ğ±â
+		// 4ë¹„íŠ¸ ë°€ê¸°
 		entry->next = (SListEntry*)((uint64)expected.HeaderX64.next << 4);
 		desired.HeaderX64.depth = expected.HeaderX64.depth + 1;
 		desired.HeaderX64.sequence = expected.HeaderX64.sequence + 1;
@@ -102,7 +102,7 @@ SListEntry* PopEntrySList(SListHeader* header)
 		if (entry == nullptr)
 			break;
 
-		// ¿©·¯ °÷¿¡¼­ PopÀ» ÇÑ´Ù¸é, Use-After-Free°¡ ¹ß»ıÇÒ ¼öµµ!
+		// ì—¬ëŸ¬ ê³³ì—ì„œ Popì„ í•œë‹¤ë©´, Use-After-Freeê°€ ë°œìƒí•  ìˆ˜ë„!
 		desired.HeaderX64.next = ((uint64)entry->next) >> 4;
 		desired.HeaderX64.depth = desired.HeaderX64.depth - 1;
 		desired.HeaderX64.sequence = desired.HeaderX64.sequence + 1;
